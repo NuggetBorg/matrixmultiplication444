@@ -10,8 +10,9 @@ package matricmult;
 public class Main {
 
 	public static void main(String[] args) {
+		MultiplyTask multiplyTask = new MultiplyTask();
 		// TODO Auto-generated method stub
-
+		multiplyTask.run();
 	}
 
 }
