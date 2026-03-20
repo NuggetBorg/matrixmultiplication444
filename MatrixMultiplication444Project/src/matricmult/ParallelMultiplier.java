@@ -1,16 +1,14 @@
 package matricmult;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * 
- * Implements parallelism
+ * Performs matrix multiplication across multiple threads
+ * Static to allow concurrency within the class
  * 
  */
 public class ParallelMultiplier {
 
-	final static int THREAD_COUNT = 4;
+	static int THREAD_COUNT;
 	
 	static int rowsA;
 	static int colsA;
@@ -20,32 +18,49 @@ public class ParallelMultiplier {
 	static int[][] b;
 	static int[][] output;
 
-	public static int[][] multiply(int[][] matA, int[][] matB) {
-		
-		//List<Thread> threads = new ArrayList<>();
+	public static int[][] multiply(int[][] matA, int[][] matB, int threadCount) {
+		THREAD_COUNT = threadCount;
+		//List of threads
 		Thread[] threads = new Thread[THREAD_COUNT];
+		// Matrices
 		a = matA;
 		b = matB;
+		// Matrix dimensions
 		rowsA = a.length;
 		colsA = a[0].length;
 		rowsB = b.length;
 		colsB = b[0].length;
+		//Output matrix
 		output = new int[rowsA][colsB];
+		
 		// Start timer
         long startTime = System.nanoTime();
+        
+        // Ensure matrices are valid for multiplication
 		if(colsA != rowsB) {
 			System.out.println("The matrices cannot be multiplied: Incorrect Dimensions!");
 			return new int[0][0];
-		} else {
+		} else { // If the matrices are valid
 			
-			// Create a thread for each row of the result matrix
+			//Calculate # rows per thread
+			int rowsPerThread = rowsA / THREAD_COUNT;
+			int extraRows = rowsA % THREAD_COUNT;
+			int startRow = 0;
+			int endRow;
+			
+			// Distribute rows among threads
 	        for (int i = 0; i < THREAD_COUNT; i++) {
-	            // Use a final variable for the row index for use within the Runnable
-	            final int row = i; 
-	            Runnable task = new MatrixRowMultiplier(row);
+	        	// Add 1 if there were extra rows
+	        	int threadRowCount = rowsPerThread + (i < extraRows ? 1 : 0);
+	        	// Set last row to an offset of the first row
+	        	endRow = startRow + threadRowCount;
+	        	// Start the thread
+	            Runnable task = new MatrixRowMultiplier(startRow, endRow);
 	            Thread thread = new Thread(task);
 	            threads[i] = thread;
 	            thread.start();
+	            // Update start to end of previous block
+	            startRow = endRow;
 	        }
 
 	        // Wait for all threads to complete using join()
@@ -65,21 +80,28 @@ public class ParallelMultiplier {
 		return output;
     }
 	
+	public static int[][] multiply(int[][] matA, int[][] matB) {
+		return multiply(matA, matB, 4);
+	}
 	
 	static class MatrixRowMultiplier implements Runnable {
-        private final int rowToCompute;
+        private final int startRow;
+        private final int endRow;
 
-        MatrixRowMultiplier(int rowToCompute) {
-            this.rowToCompute = rowToCompute;
+        MatrixRowMultiplier(int startRow, int endRow) {
+            this.startRow = startRow;
+            this.endRow = endRow;
         }
 
         @Override
         public void run() {
-            for (int j = 0; j < colsB; j++) {
-                for (int k = 0; k < colsA; k++) {
-                    output[rowToCompute][j] += a[rowToCompute][k] * b[k][j];
-                }
-            }
+        	for(int i = startRow; i < endRow; i++) {
+	            for (int j = 0; j < colsB; j++) {
+	                for (int k = 0; k < colsA; k++) {
+	                    output[i][j] += a[i][k] * b[k][j];
+	                }
+	            }
+        	}
         }
     }
 	
