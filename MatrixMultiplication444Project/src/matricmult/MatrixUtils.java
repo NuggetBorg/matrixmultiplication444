@@ -18,7 +18,7 @@ public class MatrixUtils {
                 a[i][j] = (int)(Math.round(Math.random() * 100));
             }
         }
-        System.out.println("Matrix Populated");
+        //System.out.println("Matrix Populated");
         return a;       
 	}
 	// Create square matrices
@@ -32,7 +32,7 @@ public class MatrixUtils {
                 a[i][j] = (int)(Math.round(Math.random() * 100));
             }
         }
-        System.out.println("Matrix Populated");
+        //System.out.println("Matrix Populated");
         return a;       
 	}
 	

@@ -7,7 +7,8 @@ package matricmult;
  * 
  */
 public class ParallelMultiplier {
-
+	// Store the result in a volatile variable to prevent dead code elimination
+	static volatile int result;
 	static int THREAD_COUNT;
 	
 	static int rowsA;
@@ -18,7 +19,7 @@ public class ParallelMultiplier {
 	static int[][] b;
 	static int[][] output;
 
-	public static int[][] multiply(int[][] matA, int[][] matB, int threadCount) {
+	public static double multiply(int[][] matA, int[][] matB, int threadCount) {
 		THREAD_COUNT = threadCount;
 		//List of threads
 		Thread[] threads = new Thread[THREAD_COUNT];
@@ -39,7 +40,7 @@ public class ParallelMultiplier {
         // Ensure matrices are valid for multiplication
 		if(colsA != rowsB) {
 			System.out.println("The matrices cannot be multiplied: Incorrect Dimensions!");
-			return new int[0][0];
+			return 0;
 		} else { // If the matrices are valid
 			
 			//Calculate # rows per thread
@@ -73,14 +74,14 @@ public class ParallelMultiplier {
 				}
 	        }
 		}
+		result = output[0][0];
 		// Stop timer
         long endTime = System.nanoTime();
         double seconds = (endTime - startTime) / 1_000_000_000.0;
-        System.out.println("Parallel Time: " + seconds);
-		return output;
+		return seconds;
     }
 	
-	public static int[][] multiply(int[][] matA, int[][] matB) {
+	public static double multiply(int[][] matA, int[][] matB) {
 		return multiply(matA, matB, 4);
 	}
 	

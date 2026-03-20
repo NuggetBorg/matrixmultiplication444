@@ -8,18 +8,22 @@ package matricmult;
  * 
  */
 public class SequentialMultiplier {
-	public int[][] multiply(int[][] a, int[][] b) {
-		System.out.println("");
+	// Store the result in a volatile variable to prevent dead code elimination
+	static volatile int result;
+	
+	public double multiply(int[][] a, int[][] b) {
 		int rowsA = a.length;
 		int colsA = a[0].length;
 		int rowsB = b.length;
 		int colsB = b[0].length;
+		int[][] output;
+		
 		
 		if(colsA != rowsB) {
 			System.out.println("The matrices cannot be multiplied: Incorrect Dimensions!");
-			return new int[0][0];
+			return 0;
 		} else {
-			int[][] output = new int[rowsA][colsB];
+			output = new int[rowsA][colsB];
 	        // Start timer
 	        long startTime = System.nanoTime();
 	        // Matrix Multiplication
@@ -32,13 +36,11 @@ public class SequentialMultiplier {
 	                output[i][j] = sum;
 	            }
 	        }
-	        
+	        result = output[0][0];
 	        // Stop timer
 	        long endTime = System.nanoTime();
-	        double seconds = (endTime - startTime) / 1_000_000_000.0;
-	        System.out.println("Sequential Time: " + seconds);
-	        
-	        return output;
+	        double seconds = (endTime - startTime) / 1_000_000_000.0;        
+	        return seconds;
 		}
     }
 }
